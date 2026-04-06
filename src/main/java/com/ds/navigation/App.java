@@ -9,12 +9,27 @@ import com.ds.navigation.service.TrafficSimulationService;
 import com.ds.navigation.service.ViewportService;
 import com.ds.navigation.ui.MainFrame;
 import com.ds.navigation.util.AppConfig;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Enumeration;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 public final class App {
+    private static final String[] UI_FONT_CANDIDATES = {
+            "Noto Sans CJK SC",
+            "Source Han Sans SC",
+            "WenQuanYi Micro Hei",
+            "Microsoft YaHei",
+            "PingFang SC",
+            "SimHei",
+            "SimSun",
+            "Dialog"
+    };
+
     private App() {
     }
 
@@ -56,6 +71,7 @@ public final class App {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
         }
+        installDefaultUiFont();
         SwingUtilities.invokeLater(() -> {
             MainFrame frame = new MainFrame(
                     config,
@@ -68,5 +84,31 @@ public final class App {
                     viewportService);
             frame.setVisible(true);
         });
+    }
+
+    private static void installDefaultUiFont() {
+        Font uiFont = resolveUiFont();
+        UIDefaults defaults = UIManager.getDefaults();
+        Enumeration<Object> keys = defaults.keys();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            Object value = defaults.get(key);
+            if (value instanceof Font) {
+                UIManager.put(key, uiFont);
+            }
+        }
+    }
+
+    private static Font resolveUiFont() {
+        String[] availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                .getAvailableFontFamilyNames();
+        for (String candidate : UI_FONT_CANDIDATES) {
+            for (String availableFont : availableFonts) {
+                if (candidate.equalsIgnoreCase(availableFont)) {
+                    return new Font(availableFont, Font.PLAIN, 14);
+                }
+            }
+        }
+        return new Font(Font.SANS_SERIF, Font.PLAIN, 14);
     }
 }
