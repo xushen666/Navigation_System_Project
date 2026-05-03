@@ -7,6 +7,7 @@ import com.ds.navigation.service.TrafficSimulationService.VehicleRenderState;
 import com.ds.navigation.service.ViewportService;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -18,6 +19,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -29,15 +31,6 @@ public class MapPanel extends JPanel {
     public interface MapClickListener {
         void onMapClicked(double worldX, double worldY);
     }
-
-    private static final Color EDGE_DEFAULT = new Color(205, 210, 220);
-    private static final Color EDGE_QUERY = new Color(39, 100, 194);
-    private static final Color EDGE_DISTANCE = new Color(30, 153, 73);
-    private static final Color EDGE_TIME = new Color(190, 63, 41);
-    private static final Color POINT_DEFAULT = new Color(70, 76, 87);
-    private static final Color POINT_QUERY = new Color(39, 100, 194);
-    private static final Color POINT_START = new Color(31, 152, 86);
-    private static final Color POINT_END = new Color(210, 120, 10);
 
     private final ViewportService viewportService;
     private Graph graph;
@@ -58,10 +51,17 @@ public class MapPanel extends JPanel {
     private Point hoverPoint;
     private MapClickListener mapClickListener;
 
+    // Floating control button layout (bottom-right corner)
+    private static final int FLOAT_BTN_SIZE = 34;
+    private static final int FLOAT_BTN_GAP = 3;
+    private static final int FLOAT_MARGIN = 16;
+    private static final int FLOAT_TOTAL_H = FLOAT_BTN_SIZE * 4 + FLOAT_BTN_GAP * 3;
+    private static final int FLOAT_PANEL_W = FLOAT_BTN_SIZE + 12;
+    private static final int FLOAT_PANEL_H = FLOAT_TOTAL_H + 12;
+
     public MapPanel(ViewportService viewportService) {
         this.viewportService = viewportService;
-        setBackground(Color.WHITE);
-        setToolTipText("");
+        setBackground(ThemeConstants.BG_LIGHT_GRAY);
         installMouseHandlers();
     }
 
@@ -160,7 +160,8 @@ public class MapPanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         if (graph == null || graph.vertexCount() == 0) {
-            g2.setColor(Color.DARK_GRAY);
+            g2.setColor(ThemeConstants.TEXT_SECONDARY);
+            g2.setFont(ThemeConstants.FONT_14);
             g2.drawString("暂无地图数据，请先生成或加载地图。", 30, 30);
             g2.dispose();
             return;
@@ -173,6 +174,18 @@ public class MapPanel extends JPanel {
             visibleIds.add(vertex.getId());
         }
 
+        drawEdges(g2, visibleIds);
+        drawVertices(g2, visibleVertices);
+
+        if (showTraffic) {
+            drawVehicles(g2);
+        }
+        drawCoordinateOverlay(g2);
+        drawFloatingControls(g2);
+        g2.dispose();
+    }
+
+    private void drawEdges(Graphics2D g2, Set<Integer> visibleIds) {
         for (Edge edge : graph.getEdges()) {
             boolean highlighted = queryEdgeIds.contains(edge.getId())
                     || distancePathEdgeIds.contains(edge.getId())
@@ -182,79 +195,74 @@ public class MapPanel extends JPanel {
             }
             Vertex from = graph.getVertex(edge.getFromId());
             Vertex to = graph.getVertex(edge.getToId());
-            Color color = EDGE_DEFAULT;
+            Color color = ThemeConstants.ROAD_DEFAULT;
             float stroke = 1.0f;
             if (showTraffic && !highlighted) {
                 color = trafficColor(edge.getOccupancyRatio());
-                stroke = 1.2f + (float) Math.min(4.0, edge.getOccupancyRatio() * 4.0);
+                stroke = 1.2f + (float) Math.min(3.0, edge.getOccupancyRatio() * 3.0);
             }
             if (queryEdgeIds.contains(edge.getId())) {
-                color = EDGE_QUERY;
+                color = ThemeConstants.ROAD_QUERY;
                 stroke = 1.8f;
             }
-            if (distancePathEdgeIds.contains(edge.getId())) {
-                color = EDGE_DISTANCE;
-                stroke = 2.8f;
-            }
-            if (timePathEdgeIds.contains(edge.getId())) {
-                color = EDGE_TIME;
-                stroke = 3.0f;
+            boolean isDistance = distancePathEdgeIds.contains(edge.getId());
+            boolean isTime = timePathEdgeIds.contains(edge.getId());
+            if (isDistance || isTime) {
+                color = isDistance ? ThemeConstants.ROAD_DISTANCE : ThemeConstants.ROAD_TIME;
+                stroke = isDistance ? 2.6f : 2.8f;
+                g2.setStroke(new BasicStroke(stroke + 4.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 50));
+                g2.draw(new Line2D.Double(
+                        worldToScreenX(from.getX()), worldToScreenY(from.getY()),
+                        worldToScreenX(to.getX()), worldToScreenY(to.getY())));
             }
             g2.setColor(color);
-            g2.setStroke(new BasicStroke(stroke));
+            g2.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.draw(new Line2D.Double(
-                    worldToScreenX(from.getX()),
-                    worldToScreenY(from.getY()),
-                    worldToScreenX(to.getX()),
-                    worldToScreenY(to.getY())));
+                    worldToScreenX(from.getX()), worldToScreenY(from.getY()),
+                    worldToScreenX(to.getX()), worldToScreenY(to.getY())));
         }
+    }
 
+    private void drawVertices(Graphics2D g2, List<Vertex> visibleVertices) {
         for (Vertex vertex : visibleVertices) {
-            int radius = 4;
-            Color color = POINT_DEFAULT;
+            int radius = 3;
+            Color color = ThemeConstants.POINT_DEFAULT;
             if (queryVertexIds.contains(vertex.getId())) {
-                color = POINT_QUERY;
-                radius = 6;
-            }
-            if (selectedStartId != null && selectedStartId == vertex.getId()) {
-                color = POINT_START;
-                radius = 7;
-            }
-            if (selectedEndId != null && selectedEndId == vertex.getId()) {
-                color = POINT_END;
-                radius = 7;
+                color = ThemeConstants.ROAD_QUERY;
+                radius = 5;
             }
             if (distancePathVertexIds.contains(vertex.getId())) {
-                color = EDGE_DISTANCE;
-                radius = 6;
+                color = ThemeConstants.ROAD_DISTANCE;
+                radius = 5;
             }
             if (timePathVertexIds.contains(vertex.getId())) {
-                color = EDGE_TIME;
-                radius = 6;
+                color = ThemeConstants.ROAD_TIME;
+                radius = 5;
             }
-            if (selectedStartId != null && selectedStartId == vertex.getId()) {
-                color = POINT_START;
-                radius = 7;
-            }
-            if (selectedEndId != null && selectedEndId == vertex.getId()) {
-                color = POINT_END;
-                radius = 7;
-            }
-            double x = worldToScreenX(vertex.getX()) - radius / 2.0;
-            double y = worldToScreenY(vertex.getY()) - radius / 2.0;
-            g2.setColor(color);
-            g2.fill(new Ellipse2D.Double(x, y, radius, radius));
-        }
+            boolean isStart = selectedStartId != null && selectedStartId == vertex.getId();
+            boolean isEnd = selectedEndId != null && selectedEndId == vertex.getId();
 
-        if (showTraffic) {
-            drawVehicles(g2);
+            double sx = worldToScreenX(vertex.getX());
+            double sy = worldToScreenY(vertex.getY());
+
+            if (isStart || isEnd) {
+                Color markerColor = isStart ? ThemeConstants.POINT_START : ThemeConstants.POINT_END;
+                g2.setColor(markerColor);
+                g2.fill(new Ellipse2D.Double(sx - 7, sy - 7, 14, 14));
+                g2.setColor(Color.WHITE);
+                g2.fill(new Ellipse2D.Double(sx - 3, sy - 3, 6, 6));
+            } else {
+                g2.setColor(color);
+                g2.fill(new Ellipse2D.Double(sx - radius / 2.0, sy - radius / 2.0, radius, radius));
+            }
         }
-        drawCoordinateOverlay(g2);
-        g2.dispose();
     }
 
     private void drawVehicles(Graphics2D g2) {
-        g2.setColor(new Color(36, 96, 220, 220));
+        g2.setColor(new Color(0x1A, 0x6B, 0xC0, 220));
+        Font vehicleFont = new Font("Microsoft YaHei", Font.PLAIN, 10);
+        g2.setFont(vehicleFont);
         for (VehicleRenderState state : trafficVehicles) {
             Vertex from = graph.getVertex(state.fromId());
             Vertex to = graph.getVertex(state.toId());
@@ -263,10 +271,62 @@ public class MapPanel extends JPanel {
             }
             double x = from.getX() + (to.getX() - from.getX()) * state.progress();
             double y = from.getY() + (to.getY() - from.getY()) * state.progress();
-            double sx = worldToScreenX(x) - 3.0;
-            double sy = worldToScreenY(y) - 3.0;
-            g2.fill(new Ellipse2D.Double(sx, sy, 6, 6));
+            double sx = worldToScreenX(x);
+            double sy = worldToScreenY(y);
+
+            double dx = to.getX() - from.getX();
+            double dy = to.getY() - from.getY();
+            double angle = Math.atan2(dy, dx);
+
+            int[] xPoints = new int[3];
+            int[] yPoints = new int[3];
+            xPoints[0] = (int) (sx + Math.cos(angle) * 5);
+            yPoints[0] = (int) (sy - Math.sin(angle) * 5);
+            xPoints[1] = (int) (sx + Math.cos(angle + 2.5) * 4);
+            yPoints[1] = (int) (sy - Math.sin(angle + 2.5) * 4);
+            xPoints[2] = (int) (sx + Math.cos(angle - 2.5) * 4);
+            yPoints[2] = (int) (sy - Math.sin(angle - 2.5) * 4);
+
+            g2.fillPolygon(xPoints, yPoints, 3);
         }
+    }
+
+    private void drawFloatingControls(Graphics2D g2) {
+        int px = getWidth() - FLOAT_MARGIN - FLOAT_PANEL_W;
+        int py = getHeight() - FLOAT_MARGIN - FLOAT_PANEL_H;
+
+        g2.setColor(new Color(255, 255, 255, 225));
+        g2.fill(new RoundRectangle2D.Double(px, py, FLOAT_PANEL_W, FLOAT_PANEL_H, 8, 8));
+        g2.setColor(ThemeConstants.BORDER_LIGHT);
+        g2.setStroke(new BasicStroke(1f));
+        g2.draw(new RoundRectangle2D.Double(px, py, FLOAT_PANEL_W, FLOAT_PANEL_H, 8, 8));
+
+        int bx = px + 6;
+        int by = py + 6;
+        Font floatFont = new Font("Microsoft YaHei", Font.BOLD, 16);
+        g2.setFont(floatFont);
+        FontMetrics fm = g2.getFontMetrics();
+
+        drawFloatButton(g2, bx, by, FLOAT_BTN_SIZE, "+");
+        by += FLOAT_BTN_SIZE + FLOAT_BTN_GAP;
+        drawFloatButton(g2, bx, by, FLOAT_BTN_SIZE, "-");
+        by += FLOAT_BTN_SIZE + FLOAT_BTN_GAP;
+        drawFloatButton(g2, bx, by, FLOAT_BTN_SIZE, "⟲");
+        by += FLOAT_BTN_SIZE + FLOAT_BTN_GAP;
+        drawFloatButton(g2, bx, by, FLOAT_BTN_SIZE, "✕");
+    }
+
+    private void drawFloatButton(Graphics2D g2, int x, int y, int size, String symbol) {
+        g2.setColor(ThemeConstants.CARD_WHITE);
+        g2.fill(new RoundRectangle2D.Double(x, y, size, size, 6, 6));
+        g2.setColor(ThemeConstants.BORDER_LIGHT);
+        g2.setStroke(new BasicStroke(1f));
+        g2.draw(new RoundRectangle2D.Double(x, y, size, size, 6, 6));
+
+        g2.setColor(ThemeConstants.TEXT_PRIMARY);
+        FontMetrics fm = g2.getFontMetrics();
+        int tw = fm.stringWidth(symbol);
+        g2.drawString(symbol, x + (size - tw) / 2, y + (size + fm.getAscent()) / 2 - 2);
     }
 
     private void installMouseHandlers() {
@@ -303,10 +363,17 @@ public class MapPanel extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (graph == null || mapClickListener == null || e.getButton() != MouseEvent.BUTTON1) {
+                if (graph == null || e.getButton() != MouseEvent.BUTTON1) {
                     return;
                 }
-                mapClickListener.onMapClicked(screenToWorldX(e.getX()), screenToWorldY(e.getY()));
+                int floatAction = hitTestFloatingButton(e.getX(), e.getY());
+                if (floatAction >= 0) {
+                    handleFloatAction(floatAction);
+                    return;
+                }
+                if (mapClickListener != null) {
+                    mapClickListener.onMapClicked(screenToWorldX(e.getX()), screenToWorldY(e.getY()));
+                }
             }
 
             @Override
@@ -338,6 +405,40 @@ public class MapPanel extends JPanel {
         addMouseWheelListener(adapter);
     }
 
+    private int hitTestFloatingButton(int screenX, int screenY) {
+        int px = getWidth() - FLOAT_MARGIN - FLOAT_PANEL_W + 6;
+        int py = getHeight() - FLOAT_MARGIN - FLOAT_PANEL_H + 6;
+        for (int i = 0; i < 4; i++) {
+            int by = py + i * (FLOAT_BTN_SIZE + FLOAT_BTN_GAP);
+            if (screenX >= px && screenX <= px + FLOAT_BTN_SIZE
+                    && screenY >= by && screenY <= by + FLOAT_BTN_SIZE) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void handleFloatAction(int index) {
+        double factor;
+        switch (index) {
+            case 0 -> { // zoom in
+                scale *= 1.25;
+                scale = clamp(scale, 0.01, 40.0);
+                repaint();
+            }
+            case 1 -> { // zoom out
+                scale *= 0.8;
+                scale = clamp(scale, 0.01, 40.0);
+                repaint();
+            }
+            case 2 -> resetView();  // reset view
+            case 3 -> { // clear highlights
+                clearHighlights();
+                repaint();
+            }
+        }
+    }
+
     private void updateHoverTooltip(int screenX, int screenY) {
         if (graph == null) {
             setToolTipText(null);
@@ -349,13 +450,9 @@ public class MapPanel extends JPanel {
             return;
         }
         setToolTipText(String.format(
-                Locale.US,
-                "道路 %d | 长度: %.1f | 容量: %d 辆 | 当前车辆: %d 辆 | 负载比: %.2f",
-                edge.getId(),
-                edge.getLength(),
-                edge.getCapacity(),
-                edge.getCurrentVehicles(),
-                edge.getOccupancyRatio()));
+                "<html>道路 %d &nbsp;|&nbsp; 长度: %.1f &nbsp;|&nbsp; 容量: %d &nbsp;|&nbsp; 当前: %d &nbsp;|&nbsp; 负载: %.2f</html>",
+                edge.getId(), edge.getLength(), edge.getCapacity(),
+                edge.getCurrentVehicles(), edge.getOccupancyRatio()));
     }
 
     private Edge findNearestEdgeAtScreen(int screenX, int screenY, double maxDistance) {
@@ -383,30 +480,32 @@ public class MapPanel extends JPanel {
     private void drawCoordinateOverlay(Graphics2D g2) {
         String mouseText;
         if (hoverPoint == null) {
-            mouseText = "鼠标坐标: (-, -)";
+            mouseText = "鼠标: (-, -)";
         } else {
-            mouseText = String.format(Locale.US, "鼠标坐标: (%.1f, %.1f)",
+            mouseText = String.format(Locale.US, "鼠标: (%.1f, %.1f)",
                     screenToWorldX(hoverPoint.x), screenToWorldY(hoverPoint.y));
         }
-        String centerText = String.format(Locale.US, "视图中心: (%.1f, %.1f)", centerX, centerY);
-        String scaleText = String.format(Locale.US, "缩放倍率: %.3f", scale);
+        String centerText = String.format(Locale.US, "中心: (%.1f, %.1f)", centerX, centerY);
+        String scaleText = String.format(Locale.US, "缩放: %.3f", scale);
 
+        g2.setFont(ThemeConstants.FONT_12);
         FontMetrics metrics = g2.getFontMetrics();
         int width = Math.max(metrics.stringWidth(mouseText),
-                Math.max(metrics.stringWidth(centerText), metrics.stringWidth(scaleText))) + 20;
-        int height = metrics.getHeight() * 3 + 18;
-        int x = 12;
-        int y = 12;
+                Math.max(metrics.stringWidth(centerText), metrics.stringWidth(scaleText))) + 18;
+        int height = metrics.getHeight() * 3 + 16;
+        int x = 10;
+        int y = 10;
 
-        g2.setColor(new Color(255, 255, 255, 220));
-        g2.fillRoundRect(x, y, width, height, 12, 12);
-        g2.setColor(new Color(90, 90, 90, 180));
-        g2.drawRoundRect(x, y, width, height, 12, 12);
-        g2.setColor(new Color(40, 40, 40));
-        int textY = y + metrics.getAscent() + 8;
-        g2.drawString(mouseText, x + 10, textY);
-        g2.drawString(centerText, x + 10, textY + metrics.getHeight());
-        g2.drawString(scaleText, x + 10, textY + metrics.getHeight() * 2);
+        g2.setColor(new Color(255, 255, 255, 210));
+        g2.fill(new RoundRectangle2D.Double(x, y, width, height, 8, 8));
+        g2.setColor(new Color(0xD0, 0xD0, 0xD0, 160));
+        g2.setStroke(new BasicStroke(1f));
+        g2.draw(new RoundRectangle2D.Double(x, y, width, height, 8, 8));
+        g2.setColor(ThemeConstants.TEXT_SECONDARY);
+        int textY = y + metrics.getAscent() + 5;
+        g2.drawString(mouseText, x + 9, textY);
+        g2.drawString(centerText, x + 9, textY + metrics.getHeight());
+        g2.drawString(scaleText, x + 9, textY + metrics.getHeight() * 2);
     }
 
     private Rectangle2D getWorldViewport() {
@@ -433,12 +532,12 @@ public class MapPanel extends JPanel {
 
     private Color trafficColor(double ratio) {
         if (ratio <= 0.5) {
-            return new Color(46, 170, 70);
+            return ThemeConstants.TRAFFIC_SMOOTH;
         }
         if (ratio <= 0.9) {
-            return new Color(236, 196, 35);
+            return ThemeConstants.TRAFFIC_MODERATE;
         }
-        return new Color(214, 54, 46);
+        return ThemeConstants.TRAFFIC_CONGESTED;
     }
 
     private double clamp(double value, double min, double max) {

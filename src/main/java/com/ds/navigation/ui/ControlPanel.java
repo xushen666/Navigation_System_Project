@@ -1,132 +1,186 @@
 package com.ds.navigation.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.FlowLayout;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.JButton;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 public class ControlPanel extends JPanel {
-    private final JTextField xField = new JTextField("5000", 12);
-    private final JTextField yField = new JTextField("5000", 12);
-    private final JLabel startLabel = new JLabel("A 点：未选择");
-    private final JLabel endLabel = new JLabel("B 点：未选择");
-    private final JButton generateButton = new JButton("生成地图");
-    private final JButton nearbyButton = new JButton("附近100点");
-    private final JButton distancePathButton = new JButton("距离最短路径");
-    private final JButton timePathButton = new JButton("路况最优路径");
-    private final JButton startSimulationButton = new JButton("开始模拟");
-    private final JButton pauseSimulationButton = new JButton("暂停模拟");
-    private final JButton resetSimulationButton = new JButton("重置模拟");
-    private final JButton clearButton = new JButton("清空高亮");
-    private final JButton resetViewButton = new JButton("重置视图");
-    private final JTextArea resultArea = new JTextArea(18, 18);
+    private final GaodeTextField xField = new GaodeTextField(10);
+    private final GaodeTextField yField = new GaodeTextField(10);
+    private final JLabel startLabel = new JLabel("未选择");
+    private final JLabel endLabel = new JLabel("未选择");
+    private final GaodeButton generateButton = new GaodeButton("生成地图", GaodeButton.Style.PRIMARY_FILL);
+    private final GaodeButton nearbyButton = new GaodeButton("附近100点", GaodeButton.Style.PRIMARY_FILL);
+    private final GaodeButton distancePathButton = new GaodeButton("距离最短路径", GaodeButton.Style.PRIMARY_FILL);
+    private final GaodeButton timePathButton = new GaodeButton("路况最优路径", GaodeButton.Style.PRIMARY_OUTLINE);
+    private final GaodeButton startSimulationButton = new GaodeButton("开始模拟", GaodeButton.Style.PRIMARY_FILL);
+    private final GaodeButton pauseSimulationButton = new GaodeButton("暂停模拟", GaodeButton.Style.PRIMARY_OUTLINE);
+    private final GaodeButton resetSimulationButton = new GaodeButton("重置模拟", GaodeButton.Style.TEXT_ONLY);
+    private final GaodeButton clearButton = new GaodeButton("清空高亮", GaodeButton.Style.TEXT_ONLY);
+    private final GaodeButton resetViewButton = new GaodeButton("重置视图", GaodeButton.Style.PRIMARY_OUTLINE);
+    private final JTextArea resultArea = new JTextArea(12, 18);
 
     public ControlPanel() {
-        setLayout(new BorderLayout(0, 8));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setPreferredSize(new Dimension(300, 0));
+        setLayout(new BorderLayout());
+        setBackground(ThemeConstants.BG_LIGHT_GRAY);
+        setPreferredSize(new Dimension(ThemeConstants.CONTROL_PANEL_WIDTH, 0));
 
-        JPanel topPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 4, 4, 4);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1;
+        JPanel scrollContent = new JPanel();
+        scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
+        scrollContent.setBackground(ThemeConstants.BG_LIGHT_GRAY);
+        scrollContent.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        topPanel.add(new JLabel("查询坐标 X"), gbc);
-        gbc.gridy = 1;
-        topPanel.add(xField, gbc);
-        gbc.gridy = 2;
-        topPanel.add(new JLabel("查询坐标 Y"), gbc);
-        gbc.gridy = 3;
-        topPanel.add(yField, gbc);
-        gbc.gridy = 4;
-        topPanel.add(startLabel, gbc);
-        gbc.gridy = 5;
-        topPanel.add(endLabel, gbc);
-        gbc.gridy = 6;
-        topPanel.add(generateButton, gbc);
-        gbc.gridy = 7;
-        topPanel.add(nearbyButton, gbc);
-        gbc.gridy = 8;
-        topPanel.add(distancePathButton, gbc);
-        gbc.gridy = 9;
-        topPanel.add(timePathButton, gbc);
-        gbc.gridy = 10;
-        topPanel.add(startSimulationButton, gbc);
-        gbc.gridy = 11;
-        topPanel.add(pauseSimulationButton, gbc);
-        gbc.gridy = 12;
-        topPanel.add(resetSimulationButton, gbc);
-        gbc.gridy = 13;
-        topPanel.add(clearButton, gbc);
-        gbc.gridy = 14;
-        topPanel.add(resetViewButton, gbc);
-        gbc.gridy = 15;
-        gbc.weighty = 1;
-        topPanel.add(Box.createVerticalGlue(), gbc);
+        // Card 1: Query coordinates
+        CardPanel queryCard = new CardPanel("查询坐标");
+        JPanel queryContent = verticalPanel();
+        queryContent.add(fieldRow("X 坐标", xField));
+        queryContent.add(Box.createVerticalStrut(6));
+        queryContent.add(fieldRow("Y 坐标", yField));
+        queryContent.add(Box.createVerticalStrut(10));
+        queryContent.add(nearbyButton);
+        queryCard.addContent(queryContent);
+        scrollContent.add(queryCard);
 
+        scrollContent.add(Box.createVerticalStrut(8));
+
+        // Card 2: Route planning
+        CardPanel routeCard = new CardPanel("路径规划");
+        JPanel routeContent = verticalPanel();
+        startLabel.setFont(ThemeConstants.FONT_14);
+        startLabel.setForeground(ThemeConstants.TEXT_PRIMARY);
+        endLabel.setFont(ThemeConstants.FONT_14);
+        endLabel.setForeground(ThemeConstants.TEXT_PRIMARY);
+        routeContent.add(startLabel);
+        routeContent.add(Box.createVerticalStrut(4));
+        routeContent.add(endLabel);
+        routeContent.add(Box.createVerticalStrut(10));
+        routeContent.add(distancePathButton);
+        routeContent.add(Box.createVerticalStrut(6));
+        routeContent.add(timePathButton);
+        routeCard.addContent(routeContent);
+        scrollContent.add(routeCard);
+
+        scrollContent.add(Box.createVerticalStrut(8));
+
+        // Card 3: Simulation
+        CardPanel simCard = new CardPanel("车流模拟");
+        JPanel simContent = verticalPanel();
+        simContent.add(startSimulationButton);
+        simContent.add(Box.createVerticalStrut(6));
+        simContent.add(pauseSimulationButton);
+        simContent.add(Box.createVerticalStrut(6));
+        simContent.add(resetSimulationButton);
+        simCard.addContent(simContent);
+        scrollContent.add(simCard);
+
+        scrollContent.add(Box.createVerticalStrut(8));
+
+        // Card 4: View controls
+        CardPanel viewCard = new CardPanel("视图操作");
+        JPanel viewContent = verticalPanel();
+        viewContent.add(generateButton);
+        viewContent.add(Box.createVerticalStrut(6));
+        viewContent.add(resetViewButton);
+        viewContent.add(Box.createVerticalStrut(6));
+        viewContent.add(clearButton);
+        viewCard.addContent(viewContent);
+        scrollContent.add(viewCard);
+
+        scrollContent.add(Box.createVerticalStrut(8));
+
+        // Card 5: Result output
+        CardPanel resultCard = new CardPanel("结果输出");
         resultArea.setEditable(false);
         resultArea.setLineWrap(true);
         resultArea.setWrapStyleWord(true);
-        JScrollPane scrollPane = new JScrollPane(resultArea);
-        scrollPane.setBorder(BorderFactory.createTitledBorder("结果输出"));
+        resultArea.setFont(ThemeConstants.FONT_12);
+        resultArea.setForeground(ThemeConstants.TEXT_SECONDARY);
+        resultArea.setBackground(ThemeConstants.CARD_WHITE);
+        resultArea.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        JScrollPane resultScroll = new JScrollPane(resultArea);
+        resultScroll.setBorder(null);
+        resultScroll.setPreferredSize(new Dimension(0, 120));
+        resultCard.addContent(resultScroll);
+        scrollContent.add(resultCard);
 
-        add(topPanel, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
+        JScrollPane outerScroll = new JScrollPane(scrollContent);
+        outerScroll.setBorder(null);
+        outerScroll.getVerticalScrollBar().setUnitIncrement(16);
+        outerScroll.setBackground(ThemeConstants.BG_LIGHT_GRAY);
+        outerScroll.getViewport().setBackground(ThemeConstants.BG_LIGHT_GRAY);
+        add(outerScroll, BorderLayout.CENTER);
     }
 
-    public JTextField getXField() {
+    private JPanel verticalPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        return panel;
+    }
+
+    private JPanel fieldRow(String labelText, Component field) {
+        JPanel row = new JPanel(new BorderLayout(8, 0));
+        row.setOpaque(false);
+        JLabel label = new JLabel(labelText);
+        label.setFont(ThemeConstants.FONT_14);
+        label.setForeground(ThemeConstants.TEXT_SECONDARY);
+        row.add(label, BorderLayout.WEST);
+        row.add(field, BorderLayout.CENTER);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, field.getPreferredSize().height + 2));
+        return row;
+    }
+
+    // -- Public API (unchanged signatures) --
+
+    public GaodeTextField getXField() {
         return xField;
     }
 
-    public JTextField getYField() {
+    public GaodeTextField getYField() {
         return yField;
     }
 
-    public JButton getGenerateButton() {
+    public GaodeButton getGenerateButton() {
         return generateButton;
     }
 
-    public JButton getNearbyButton() {
+    public GaodeButton getNearbyButton() {
         return nearbyButton;
     }
 
-    public JButton getDistancePathButton() {
+    public GaodeButton getDistancePathButton() {
         return distancePathButton;
     }
 
-    public JButton getTimePathButton() {
+    public GaodeButton getTimePathButton() {
         return timePathButton;
     }
 
-    public JButton getStartSimulationButton() {
+    public GaodeButton getStartSimulationButton() {
         return startSimulationButton;
     }
 
-    public JButton getPauseSimulationButton() {
+    public GaodeButton getPauseSimulationButton() {
         return pauseSimulationButton;
     }
 
-    public JButton getResetSimulationButton() {
+    public GaodeButton getResetSimulationButton() {
         return resetSimulationButton;
     }
 
-    public JButton getClearButton() {
+    public GaodeButton getClearButton() {
         return clearButton;
     }
 
-    public JButton getResetViewButton() {
+    public GaodeButton getResetViewButton() {
         return resetViewButton;
     }
 

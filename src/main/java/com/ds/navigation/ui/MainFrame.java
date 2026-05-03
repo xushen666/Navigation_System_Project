@@ -21,9 +21,6 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileSystemView;
@@ -75,7 +72,9 @@ public class MainFrame extends JFrame {
         setLayout(new BorderLayout());
         setMinimumSize(new Dimension(1280, 820));
         setSize(1280, 820);
-        setJMenuBar(buildMenuBar());
+        getContentPane().setBackground(ThemeConstants.BG_LIGHT_GRAY);
+
+        add(buildNavigationBar(), BorderLayout.NORTH);
         add(controlPanel, BorderLayout.WEST);
         add(mapPanel, BorderLayout.CENTER);
         add(statusBar, BorderLayout.SOUTH);
@@ -95,58 +94,30 @@ public class MainFrame extends JFrame {
         mapPanel.setMapClickListener(this::selectNearestVertex);
     }
 
-    private JMenuBar buildMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
+    private NavigationBar buildNavigationBar() {
+        NavigationBar nav = new NavigationBar();
 
-        JMenu fileMenu = new JMenu("文件");
-        JMenuItem generateItem = new JMenuItem("生成地图");
-        generateItem.addActionListener(event -> generateAndSaveDefaultMap());
-        JMenuItem loadItem = new JMenuItem("加载地图");
-        loadItem.addActionListener(event -> chooseAndLoadGraph());
-        JMenuItem saveItem = new JMenuItem("保存地图");
-        saveItem.addActionListener(event -> chooseAndSaveGraph());
-        JMenuItem exitItem = new JMenuItem("退出");
-        exitItem.addActionListener(event -> dispose());
-        fileMenu.add(generateItem);
-        fileMenu.add(loadItem);
-        fileMenu.add(saveItem);
-        fileMenu.add(exitItem);
+        nav.addMenu("文件", List.of(
+                new NavigationBar.PopupItem("生成地图", e -> generateAndSaveDefaultMap()),
+                new NavigationBar.PopupItem("加载地图", e -> chooseAndLoadGraph()),
+                new NavigationBar.PopupItem("保存地图", e -> chooseAndSaveGraph()),
+                new NavigationBar.PopupItem("退出", e -> dispose())));
 
-        JMenu queryMenu = new JMenu("查询");
-        JMenuItem nearbyItem = new JMenuItem("附近100点");
-        nearbyItem.addActionListener(event -> showNearbyVertices());
-        JMenuItem distanceItem = new JMenuItem("最短路径");
-        distanceItem.addActionListener(event -> showDistancePath());
-        JMenuItem timeItem = new JMenuItem("路况最优路径");
-        timeItem.addActionListener(event -> showTimePath());
-        queryMenu.add(nearbyItem);
-        queryMenu.add(distanceItem);
-        queryMenu.add(timeItem);
+        nav.addMenu("查询", List.of(
+                new NavigationBar.PopupItem("附近100点", e -> showNearbyVertices()),
+                new NavigationBar.PopupItem("最短路径", e -> showDistancePath()),
+                new NavigationBar.PopupItem("路况最优路径", e -> showTimePath())));
 
-        JMenu simulationMenu = new JMenu("模拟");
-        JMenuItem startItem = new JMenuItem("开始");
-        startItem.addActionListener(event -> startSimulation());
-        JMenuItem pauseItem = new JMenuItem("暂停");
-        pauseItem.addActionListener(event -> pauseSimulation());
-        JMenuItem resetItem = new JMenuItem("重置");
-        resetItem.addActionListener(event -> resetSimulation());
-        simulationMenu.add(startItem);
-        simulationMenu.add(pauseItem);
-        simulationMenu.add(resetItem);
+        nav.addMenu("模拟", List.of(
+                new NavigationBar.PopupItem("开始", e -> startSimulation()),
+                new NavigationBar.PopupItem("暂停", e -> pauseSimulation()),
+                new NavigationBar.PopupItem("重置", e -> resetSimulation())));
 
-        JMenu viewMenu = new JMenu("视图");
-        JMenuItem resetViewItem = new JMenuItem("重置视图");
-        resetViewItem.addActionListener(event -> mapPanel.resetView());
-        JMenuItem clearHighlightItem = new JMenuItem("清空高亮");
-        clearHighlightItem.addActionListener(event -> clearHighlights());
-        viewMenu.add(resetViewItem);
-        viewMenu.add(clearHighlightItem);
+        nav.addMenu("视图", List.of(
+                new NavigationBar.PopupItem("重置视图", e -> mapPanel.resetView()),
+                new NavigationBar.PopupItem("清空高亮", e -> clearHighlights())));
 
-        menuBar.add(fileMenu);
-        menuBar.add(queryMenu);
-        menuBar.add(simulationMenu);
-        menuBar.add(viewMenu);
-        return menuBar;
+        return nav;
     }
 
     private void setGraph(Graph graph, String message) {
