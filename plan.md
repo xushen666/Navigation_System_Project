@@ -76,7 +76,7 @@
 
 ## 3. 模块与负责人
 
-### 成员 A
+### 刘蓄
 
 - `model`
 - `repository`
@@ -85,11 +85,10 @@
 - `PathFinderService`
 - 单元测试
 
-### 成员 B
+### 仲瑞禛
 
-- `ui`
-- `TrafficSimulationService`
-- `ViewportService`
+- `jave Swing前端ui`
+- `web网页`
 - 交互提示、状态栏、演示脚本
 
 ### 共享文件

@@ -171,7 +171,7 @@ public class MainFrame extends JFrame {
         chooser.setDialogTitle("选择保存目录");
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
-                Path dir = chooser.getSelectedFile().toPath();
+                Path dir = chooser.getSelectedFile().toPath().resolve("map");
                 repository.saveGraph(graph, dir);
                 statusBar.setMessage("地图已保存到：" + dir);
             } catch (Exception ex) {

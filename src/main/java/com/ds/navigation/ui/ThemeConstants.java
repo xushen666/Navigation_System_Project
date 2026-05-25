@@ -43,6 +43,7 @@ public final class ThemeConstants {
 
     // -- Fonts --
     public static final Font FONT_12 = new Font("Microsoft YaHei", Font.PLAIN, 12);
+    public static final Font FONT_13 = new Font("Microsoft YaHei", Font.PLAIN, 13);
     public static final Font FONT_14 = new Font("Microsoft YaHei", Font.PLAIN, 14);
     public static final Font FONT_16 = new Font("Microsoft YaHei", Font.BOLD, 16);
     public static final Font FONT_20 = new Font("Microsoft YaHei", Font.BOLD, 20);

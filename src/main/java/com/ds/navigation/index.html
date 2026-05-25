@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导航系统课程设计</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="nav-bar">
+  <span class="nav-title">导航系统课程设计</span>
+  <div class="nav-menus" id="navMenus"></div>
+</nav>
+
+<div class="main-content">
+  <aside class="control-panel" id="controlPanel">
+    <!-- Card 1: Query -->
+    <div class="card">
+      <div class="card-header">查询坐标</div>
+      <div class="card-body">
+        <div class="field-row"><label>X 坐标</label><input class="field-input" id="xField" value="5000"></div>
+        <div class="field-row"><label>Y 坐标</label><input class="field-input" id="yField" value="5000"></div>
+        <button class="btn btn-primary" id="nearbyBtn">附近100点</button>
+      </div>
+    </div>
+    <!-- Card 2: Route -->
+    <div class="card">
+      <div class="card-header">路径规划</div>
+      <div class="card-body">
+        <div class="select-label" id="startLabel">A 点：未选择</div>
+        <div class="select-label" id="endLabel">B 点：未选择</div>
+        <button class="btn btn-primary" id="distanceBtn">距离最短路径</button>
+        <button class="btn btn-outline" id="timeBtn">路况最优路径</button>
+      </div>
+    </div>
+    <!-- Card 3: Simulation -->
+    <div class="card">
+      <div class="card-header">车流模拟</div>
+      <div class="card-body">
+        <button class="btn btn-primary" id="simStartBtn">开始模拟</button>
+        <button class="btn btn-outline" id="simPauseBtn">暂停模拟</button>
+        <button class="btn btn-outline" id="simResetBtn">重置模拟</button>
+      </div>
+    </div>
+    <!-- Card 4: View -->
+    <div class="card">
+      <div class="card-header">视图操作</div>
+      <div class="card-body">
+        <button class="btn btn-primary" id="genMapBtn">生成地图</button>
+        <button class="btn btn-outline" id="resetViewBtn">重置视图</button>
+        <button class="btn btn-outline" id="clearBtn">清空高亮</button>
+      </div>
+    </div>
+    <!-- Card 5: Result -->
+    <div class="card">
+      <div class="card-header">结果输出</div>
+      <div class="card-body">
+        <textarea class="result-area" id="resultArea" readonly>当前地图已就绪。&#10;请点击地图选择 A 点和 B 点，或输入坐标执行附近查询。</textarea>
+      </div>
+    </div>
+  </aside>
+
+  <div class="map-container" id="mapContainer">
+    <canvas id="mapCanvas"></canvas>
+    <div class="coord-overlay" id="coordOverlay">鼠标: (-, -)<br>中心: (-, -)<br>缩放: 0.050</div>
+    <div class="edge-tooltip" id="edgeTooltip"></div>
+    <div class="float-controls">
+      <button class="float-btn" id="floatZoomIn" title="放大">+</button>
+      <button class="float-btn" id="floatZoomOut" title="缩小">−</button>
+      <button class="float-btn" id="floatReset" title="重置视图">⟲</button>
+      <button class="float-btn" id="floatClear" title="清空高亮">✕</button>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar" id="statusBar">地图已加载，顶点数：10000，边数：----</div>
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
