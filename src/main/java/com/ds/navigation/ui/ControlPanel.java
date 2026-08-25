@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -37,8 +38,9 @@ public class ControlPanel extends JPanel {
         scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
         scrollContent.setBackground(ThemeConstants.BG_LIGHT_GRAY);
         scrollContent.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        configureActionButtons();
 
-        // Card 1: Query coordinates
+        // 查询坐标
         CardPanel queryCard = new CardPanel("查询坐标");
         JPanel queryContent = verticalPanel();
         queryContent.add(fieldRow("X 坐标", xField));
@@ -51,26 +53,28 @@ public class ControlPanel extends JPanel {
 
         scrollContent.add(Box.createVerticalStrut(8));
 
-        // Card 2: Route planning
+        // 路径规划
         CardPanel routeCard = new CardPanel("路径规划");
         JPanel routeContent = verticalPanel();
         startLabel.setFont(ThemeConstants.FONT_14);
         startLabel.setForeground(ThemeConstants.TEXT_PRIMARY);
+        startLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         endLabel.setFont(ThemeConstants.FONT_14);
         endLabel.setForeground(ThemeConstants.TEXT_PRIMARY);
-        routeContent.add(startLabel);
+        endLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        routeContent.add(labelRow(startLabel));
         routeContent.add(Box.createVerticalStrut(4));
-        routeContent.add(endLabel);
+        routeContent.add(labelRow(endLabel));
         routeContent.add(Box.createVerticalStrut(10));
-        routeContent.add(distancePathButton);
+        routeContent.add(centerRow(distancePathButton));
         routeContent.add(Box.createVerticalStrut(6));
-        routeContent.add(timePathButton);
+        routeContent.add(centerRow(timePathButton));
         routeCard.addContent(routeContent);
         scrollContent.add(routeCard);
 
         scrollContent.add(Box.createVerticalStrut(8));
 
-        // Card 3: Simulation
+        // 车流模拟
         CardPanel simCard = new CardPanel("车流模拟");
         JPanel simContent = verticalPanel();
         simContent.add(startSimulationButton);
@@ -83,7 +87,7 @@ public class ControlPanel extends JPanel {
 
         scrollContent.add(Box.createVerticalStrut(8));
 
-        // Card 4: View controls
+        // 视图操作
         CardPanel viewCard = new CardPanel("视图操作");
         JPanel viewContent = verticalPanel();
         viewContent.add(generateButton);
@@ -96,7 +100,7 @@ public class ControlPanel extends JPanel {
 
         scrollContent.add(Box.createVerticalStrut(8));
 
-        // Card 5: Result output
+        // 结果输出
         CardPanel resultCard = new CardPanel("结果输出");
         resultArea.setEditable(false);
         resultArea.setLineWrap(true);
@@ -126,6 +130,30 @@ public class ControlPanel extends JPanel {
         return panel;
     }
 
+    private void configureActionButtons() {
+        List<Button> buttons = List.of(
+                generateButton,
+                nearbyButton,
+                distancePathButton,
+                timePathButton,
+                startSimulationButton,
+                pauseSimulationButton,
+                resetSimulationButton,
+                clearButton,
+                resetViewButton);
+        Dimension preferred = new Dimension(168, 28);
+        for (Button button : buttons) {
+            button.setPreferredSize(preferred);
+            button.setMaximumSize(preferred);
+            button.setMinimumSize(new Dimension(128, preferred.height));
+            button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        }
+        Dimension queryButtonSize = new Dimension(236, 28);
+        nearbyButton.setPreferredSize(queryButtonSize);
+        nearbyButton.setMaximumSize(queryButtonSize);
+        nearbyButton.setMinimumSize(new Dimension(180, queryButtonSize.height));
+    }
+
     private JPanel fieldRow(String labelText, Component field) {
         JPanel row = new JPanel(new BorderLayout(8, 0));
         row.setOpaque(false);
@@ -138,7 +166,25 @@ public class ControlPanel extends JPanel {
         return row;
     }
 
-    // -- Public API (unchanged signatures) --
+    private JPanel labelRow(JLabel label) {
+        JPanel row = new JPanel(new BorderLayout());
+        row.setOpaque(false);
+        row.add(label, BorderLayout.WEST);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getPreferredSize().height + 2));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return row;
+    }
+
+    private JPanel centerRow(Component component) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        row.setOpaque(false);
+        row.add(component);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
+        row.setAlignmentX(Component.CENTER_ALIGNMENT);
+        return row;
+    }
+
+    // -- Public API 
 
     public RoundedTextField getXField() {
         return xField;

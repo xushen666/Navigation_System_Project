@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingConstants;
 
 public class NavigationBar extends JPanel {
     private final JPanel menuPanel;
@@ -51,10 +52,16 @@ public class NavigationBar extends JPanel {
             menuItem.setFont(ThemeConstants.FONT_14);
             menuItem.addActionListener(item.action());
             menuItem.setBackground(ThemeConstants.CARD_WHITE);
+            menuItem.setHorizontalAlignment(SwingConstants.CENTER);
+            menuItem.setPreferredSize(new Dimension(150, 32));
             popup.add(menuItem);
         }
 
-        btn.addActionListener(e -> popup.show(btn, 0, btn.getHeight()));
+        btn.addActionListener(e -> {
+            Dimension popupSize = popup.getPreferredSize();
+            int x = (btn.getWidth() - popupSize.width) / 2;
+            popup.show(btn, x, btn.getHeight());
+        });
         menuPanel.add(btn);
     }
 
