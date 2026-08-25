@@ -51,14 +51,6 @@ public class MapPanel extends JPanel {
     private Point hoverPoint;
     private MapClickListener mapClickListener;
 
-    // Floating control button layout (bottom-right corner)
-    private static final int FLOAT_BTN_SIZE = 34;
-    private static final int FLOAT_BTN_GAP = 3;
-    private static final int FLOAT_MARGIN = 16;
-    private static final int FLOAT_TOTAL_H = FLOAT_BTN_SIZE * 4 + FLOAT_BTN_GAP * 3;
-    private static final int FLOAT_PANEL_W = FLOAT_BTN_SIZE + 12;
-    private static final int FLOAT_PANEL_H = FLOAT_TOTAL_H + 12;
-
     public MapPanel(ViewportService viewportService) {
         this.viewportService = viewportService;
         setBackground(ThemeConstants.BG_LIGHT_GRAY);
@@ -181,7 +173,6 @@ public class MapPanel extends JPanel {
             drawVehicles(g2);
         }
         drawCoordinateOverlay(g2);
-        drawFloatingControls(g2);
         g2.dispose();
     }
 
@@ -196,21 +187,22 @@ public class MapPanel extends JPanel {
             Vertex from = graph.getVertex(edge.getFromId());
             Vertex to = graph.getVertex(edge.getToId());
             Color color = ThemeConstants.ROAD_DEFAULT;
-            float stroke = 1.0f;
+            float baseWidth = ThemeConstants.roadWidthByLength(edge.getLength());
+            float stroke = baseWidth;
             if (showTraffic && !highlighted) {
                 color = trafficColor(edge.getOccupancyRatio());
-                stroke = 1.2f + (float) Math.min(3.0, edge.getOccupancyRatio() * 3.0);
+                stroke = baseWidth + (float) Math.min(2.5, edge.getOccupancyRatio() * 3.0);
             }
             if (queryEdgeIds.contains(edge.getId())) {
                 color = ThemeConstants.ROAD_QUERY;
-                stroke = 1.8f;
+                stroke = baseWidth + 0.8f;
             }
             boolean isDistance = distancePathEdgeIds.contains(edge.getId());
             boolean isTime = timePathEdgeIds.contains(edge.getId());
             if (isDistance || isTime) {
                 color = isDistance ? ThemeConstants.ROAD_DISTANCE : ThemeConstants.ROAD_TIME;
-                stroke = isDistance ? 2.6f : 2.8f;
-                g2.setStroke(new BasicStroke(stroke + 4.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                stroke = baseWidth + (isDistance ? 1.6f : 1.8f);
+                g2.setStroke(new BasicStroke(stroke + 5.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 50));
                 g2.draw(new Line2D.Double(
                         worldToScreenX(from.getX()), worldToScreenY(from.getY()),
@@ -291,44 +283,6 @@ public class MapPanel extends JPanel {
         }
     }
 
-    private void drawFloatingControls(Graphics2D g2) {
-        int px = getWidth() - FLOAT_MARGIN - FLOAT_PANEL_W;
-        int py = getHeight() - FLOAT_MARGIN - FLOAT_PANEL_H;
-
-        g2.setColor(new Color(255, 255, 255, 225));
-        g2.fill(new RoundRectangle2D.Double(px, py, FLOAT_PANEL_W, FLOAT_PANEL_H, 8, 8));
-        g2.setColor(ThemeConstants.BORDER_LIGHT);
-        g2.setStroke(new BasicStroke(1f));
-        g2.draw(new RoundRectangle2D.Double(px, py, FLOAT_PANEL_W, FLOAT_PANEL_H, 8, 8));
-
-        int bx = px + 6;
-        int by = py + 6;
-        Font floatFont = new Font("Microsoft YaHei", Font.BOLD, 16);
-        g2.setFont(floatFont);
-        FontMetrics fm = g2.getFontMetrics();
-
-        drawFloatButton(g2, bx, by, FLOAT_BTN_SIZE, "+");
-        by += FLOAT_BTN_SIZE + FLOAT_BTN_GAP;
-        drawFloatButton(g2, bx, by, FLOAT_BTN_SIZE, "-");
-        by += FLOAT_BTN_SIZE + FLOAT_BTN_GAP;
-        drawFloatButton(g2, bx, by, FLOAT_BTN_SIZE, "⟲");
-        by += FLOAT_BTN_SIZE + FLOAT_BTN_GAP;
-        drawFloatButton(g2, bx, by, FLOAT_BTN_SIZE, "✕");
-    }
-
-    private void drawFloatButton(Graphics2D g2, int x, int y, int size, String symbol) {
-        g2.setColor(ThemeConstants.CARD_WHITE);
-        g2.fill(new RoundRectangle2D.Double(x, y, size, size, 6, 6));
-        g2.setColor(ThemeConstants.BORDER_LIGHT);
-        g2.setStroke(new BasicStroke(1f));
-        g2.draw(new RoundRectangle2D.Double(x, y, size, size, 6, 6));
-
-        g2.setColor(ThemeConstants.TEXT_PRIMARY);
-        FontMetrics fm = g2.getFontMetrics();
-        int tw = fm.stringWidth(symbol);
-        g2.drawString(symbol, x + (size - tw) / 2, y + (size + fm.getAscent()) / 2 - 2);
-    }
-
     private void installMouseHandlers() {
         MouseAdapter adapter = new MouseAdapter() {
             @Override
@@ -366,11 +320,6 @@ public class MapPanel extends JPanel {
                 if (graph == null || e.getButton() != MouseEvent.BUTTON1) {
                     return;
                 }
-                int floatAction = hitTestFloatingButton(e.getX(), e.getY());
-                if (floatAction >= 0) {
-                    handleFloatAction(floatAction);
-                    return;
-                }
                 if (mapClickListener != null) {
                     mapClickListener.onMapClicked(screenToWorldX(e.getX()), screenToWorldY(e.getY()));
                 }
@@ -403,40 +352,6 @@ public class MapPanel extends JPanel {
         addMouseListener(adapter);
         addMouseMotionListener(adapter);
         addMouseWheelListener(adapter);
-    }
-
-    private int hitTestFloatingButton(int screenX, int screenY) {
-        int px = getWidth() - FLOAT_MARGIN - FLOAT_PANEL_W + 6;
-        int py = getHeight() - FLOAT_MARGIN - FLOAT_PANEL_H + 6;
-        for (int i = 0; i < 4; i++) {
-            int by = py + i * (FLOAT_BTN_SIZE + FLOAT_BTN_GAP);
-            if (screenX >= px && screenX <= px + FLOAT_BTN_SIZE
-                    && screenY >= by && screenY <= by + FLOAT_BTN_SIZE) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private void handleFloatAction(int index) {
-        double factor;
-        switch (index) {
-            case 0 -> { // zoom in
-                scale *= 1.25;
-                scale = clamp(scale, 0.01, 40.0);
-                repaint();
-            }
-            case 1 -> { // zoom out
-                scale *= 0.8;
-                scale = clamp(scale, 0.01, 40.0);
-                repaint();
-            }
-            case 2 -> resetView();  // reset view
-            case 3 -> { // clear highlights
-                clearHighlights();
-                repaint();
-            }
-        }
     }
 
     private void updateHoverTooltip(int screenX, int screenY) {

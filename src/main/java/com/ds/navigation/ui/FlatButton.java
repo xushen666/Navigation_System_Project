@@ -10,7 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 
-public class GaodeButton extends JButton {
+public class FlatButton extends JButton {
 
     public enum Style {
         PRIMARY_FILL,
@@ -22,11 +22,11 @@ public class GaodeButton extends JButton {
     private boolean hover;
     private boolean pressed;
 
-    public GaodeButton(String text) {
+    public FlatButton(String text) {
         this(text, Style.PRIMARY_FILL);
     }
 
-    public GaodeButton(String text, Style style) {
+    public FlatButton(String text, Style style) {
         super(text);
         this.style = style;
         setOpaque(false);
@@ -37,7 +37,7 @@ public class GaodeButton extends JButton {
         installMouseListeners();
     }
 
-    public void setGaodeStyle(Style style) {
+    public void setFlatStyle(Style style) {
         this.style = style;
         repaint();
     }

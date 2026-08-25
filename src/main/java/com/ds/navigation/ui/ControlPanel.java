@@ -13,19 +13,19 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class ControlPanel extends JPanel {
-    private final GaodeTextField xField = new GaodeTextField(10);
-    private final GaodeTextField yField = new GaodeTextField(10);
+    private final RoundedTextField xField = new RoundedTextField(10);
+    private final RoundedTextField yField = new RoundedTextField(10);
     private final JLabel startLabel = new JLabel("未选择");
     private final JLabel endLabel = new JLabel("未选择");
-    private final GaodeButton generateButton = new GaodeButton("生成地图", GaodeButton.Style.PRIMARY_FILL);
-    private final GaodeButton nearbyButton = new GaodeButton("附近100点", GaodeButton.Style.PRIMARY_FILL);
-    private final GaodeButton distancePathButton = new GaodeButton("距离最短路径", GaodeButton.Style.PRIMARY_FILL);
-    private final GaodeButton timePathButton = new GaodeButton("路况最优路径", GaodeButton.Style.PRIMARY_OUTLINE);
-    private final GaodeButton startSimulationButton = new GaodeButton("开始模拟", GaodeButton.Style.PRIMARY_FILL);
-    private final GaodeButton pauseSimulationButton = new GaodeButton("暂停模拟", GaodeButton.Style.PRIMARY_OUTLINE);
-    private final GaodeButton resetSimulationButton = new GaodeButton("重置模拟", GaodeButton.Style.TEXT_ONLY);
-    private final GaodeButton clearButton = new GaodeButton("清空高亮", GaodeButton.Style.TEXT_ONLY);
-    private final GaodeButton resetViewButton = new GaodeButton("重置视图", GaodeButton.Style.PRIMARY_OUTLINE);
+    private final FlatButton generateButton = new FlatButton("生成地图", FlatButton.Style.PRIMARY_FILL);
+    private final FlatButton nearbyButton = new FlatButton("附近100点", FlatButton.Style.PRIMARY_FILL);
+    private final FlatButton distancePathButton = new FlatButton("距离最短路径", FlatButton.Style.PRIMARY_FILL);
+    private final FlatButton timePathButton = new FlatButton("路况最优路径", FlatButton.Style.PRIMARY_OUTLINE);
+    private final FlatButton startSimulationButton = new FlatButton("开始模拟", FlatButton.Style.PRIMARY_FILL);
+    private final FlatButton pauseSimulationButton = new FlatButton("暂停模拟", FlatButton.Style.PRIMARY_OUTLINE);
+    private final FlatButton resetSimulationButton = new FlatButton("重置模拟", FlatButton.Style.PRIMARY_OUTLINE);
+    private final FlatButton clearButton = new FlatButton("清空高亮", FlatButton.Style.PRIMARY_OUTLINE);
+    private final FlatButton resetViewButton = new FlatButton("重置视图", FlatButton.Style.PRIMARY_OUTLINE);
     private final JTextArea resultArea = new JTextArea(12, 18);
 
     public ControlPanel() {
@@ -140,47 +140,47 @@ public class ControlPanel extends JPanel {
 
     // -- Public API (unchanged signatures) --
 
-    public GaodeTextField getXField() {
+    public RoundedTextField getXField() {
         return xField;
     }
 
-    public GaodeTextField getYField() {
+    public RoundedTextField getYField() {
         return yField;
     }
 
-    public GaodeButton getGenerateButton() {
+    public FlatButton getGenerateButton() {
         return generateButton;
     }
 
-    public GaodeButton getNearbyButton() {
+    public FlatButton getNearbyButton() {
         return nearbyButton;
     }
 
-    public GaodeButton getDistancePathButton() {
+    public FlatButton getDistancePathButton() {
         return distancePathButton;
     }
 
-    public GaodeButton getTimePathButton() {
+    public FlatButton getTimePathButton() {
         return timePathButton;
     }
 
-    public GaodeButton getStartSimulationButton() {
+    public FlatButton getStartSimulationButton() {
         return startSimulationButton;
     }
 
-    public GaodeButton getPauseSimulationButton() {
+    public FlatButton getPauseSimulationButton() {
         return pauseSimulationButton;
     }
 
-    public GaodeButton getResetSimulationButton() {
+    public FlatButton getResetSimulationButton() {
         return resetSimulationButton;
     }
 
-    public GaodeButton getClearButton() {
+    public FlatButton getClearButton() {
         return clearButton;
     }
 
-    public GaodeButton getResetViewButton() {
+    public FlatButton getResetViewButton() {
         return resetViewButton;
     }
 

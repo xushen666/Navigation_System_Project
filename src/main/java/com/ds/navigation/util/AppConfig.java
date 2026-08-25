@@ -25,9 +25,9 @@ public class AppConfig {
         this.mapVertexCount = intValue(properties, "map.vertexCount", 10000);
         this.mapSeed = longValue(properties, "map.seed", 20260405L);
         this.extraEdgeProbability = doubleValue(properties, "map.extraEdgeProbability", 0.28);
-        this.shortRoadCapacity = intValue(properties, "map.capacity.short", 45);
-        this.mediumRoadCapacity = intValue(properties, "map.capacity.medium", 70);
-        this.longRoadCapacity = intValue(properties, "map.capacity.long", 95);
+        this.shortRoadCapacity = intValue(properties, "map.capacity.short", 5);
+        this.mediumRoadCapacity = intValue(properties, "map.capacity.medium", 10);
+        this.longRoadCapacity = intValue(properties, "map.capacity.long", 15);
         this.trafficAlpha = doubleValue(properties, "traffic.alpha", 0.8);
         this.trafficC = doubleValue(properties, "traffic.c", 0.05);
         this.trafficSpawnPerTick = intValue(properties, "traffic.spawnPerTick", 2);

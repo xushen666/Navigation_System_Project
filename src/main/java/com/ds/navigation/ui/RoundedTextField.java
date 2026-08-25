@@ -1,7 +1,6 @@
 package com.ds.navigation.ui;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -10,11 +9,11 @@ import java.awt.event.FocusEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JTextField;
 
-public class GaodeTextField extends JTextField {
+public class RoundedTextField extends JTextField {
     private final int arc = ThemeConstants.FIELD_ARC;
     private boolean focused;
 
-    public GaodeTextField(int columns) {
+    public RoundedTextField(int columns) {
         super(columns);
         setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
@@ -47,7 +46,7 @@ public class GaodeTextField extends JTextField {
         g2.setColor(ThemeConstants.CARD_WHITE);
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
 
-        Color borderColor = focused ? ThemeConstants.PRIMARY_BLUE : ThemeConstants.BORDER_LIGHT;
+        java.awt.Color borderColor = focused ? ThemeConstants.PRIMARY_BLUE : ThemeConstants.BORDER_LIGHT;
         g2.setColor(borderColor);
         g2.setStroke(new BasicStroke(focused ? 1.5f : 1.0f));
         g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, arc, arc);
