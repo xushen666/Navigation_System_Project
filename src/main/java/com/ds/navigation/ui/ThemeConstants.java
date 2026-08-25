@@ -26,6 +26,21 @@ public final class ThemeConstants {
     public static final Color TOOLBAR_BG = new Color(0x1A, 0x6B, 0xC0);
     public static final Color STATUSBAR_BG = new Color(0xF0, 0xF0, 0xF4);
 
+    // -- Road hierarchy widths (by length → tier) --
+    public static final float ROAD_WIDTH_MAIN = 2.8f;
+    public static final float ROAD_WIDTH_SECONDARY = 1.8f;
+    public static final float ROAD_WIDTH_LOCAL = 1.0f;
+
+    public static float roadWidthByLength(double length) {
+        if (length >= 150) {
+            return ROAD_WIDTH_MAIN;
+        }
+        if (length >= 100) {
+            return ROAD_WIDTH_SECONDARY;
+        }
+        return ROAD_WIDTH_LOCAL;
+    }
+
     // -- Map colors --
     public static final Color ROAD_DEFAULT = new Color(0xD5, 0xD8, 0xDD);
     public static final Color ROAD_QUERY = new Color(0x1A, 0x6B, 0xC0);

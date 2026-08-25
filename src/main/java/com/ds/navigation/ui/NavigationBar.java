@@ -40,7 +40,7 @@ public class NavigationBar extends JPanel {
 
     public void addMenu(String menuName, List<PopupItem> items) {
         menuMap.put(menuName, items);
-        Button btn = new Button(menuName, Button.Style.TEXT_ONLY);
+        FlatButton btn = new FlatButton(menuName, FlatButton.Style.TEXT_ONLY);
         btn.setFont(ThemeConstants.FONT_14);
         btn.setForeground(ThemeConstants.TEXT_WHITE);
         btn.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));

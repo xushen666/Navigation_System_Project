@@ -29,6 +29,7 @@
 - 语言：`Java 17`
 - 构建工具：`Maven`
 - GUI：`Swing`
+- Web 端：`HTML5 Canvas + CSS + JavaScript`（单文件，无外部依赖）
 - 测试：`JUnit 5`
 - 数据存储：`CSV + properties`
 
@@ -47,6 +48,8 @@ navigation-system/
 │  ├─ report/
 │  ├─ ppt/
 │  └─ demo/
+├─ web/
+│  └─ index.html              # Web 版导航系统
 ├─ src/
 │  ├─ main/
 │  │  ├─ java/com/ds/navigation/
@@ -153,32 +156,22 @@ java -jar target/navigation-system-1.0-SNAPSHOT.jar
 - 仿真定时器周期性刷新车辆状态
 - 随机生成车辆出发点与目的地
 - 车辆进入道路时增加道路车流量，离开时减少
-- 道路根据拥堵程度以绿 / 黄 / 橙 / 红四级显示
+- 道路根据拥堵程度以绿 / 黄 / 红三级显示
 
 ## 9. 当前实现状态
 
-当前仓库已提供：
+当前仓库已完成：
 
-- 完整 Maven 项目骨架
-- Swing 主窗口与基础交互
-- 地图生成、读写、KD-Tree、A*、车流模拟等首版实现
-- 基础单元测试
-- 开发执行文档 `plan.md`
+- 完整 Maven 项目骨架与全部源码
+-  UI（深蓝主色、道路分级渲染）
+- 地图生成、CSV 读写、KD-Tree、A*、车流模拟全部实现
+- 单元测试
+- Web 版导航系统（浏览器直接运行）
 
-## 10. 两人分工建议
+## 10. 分工
 
-- 成员 A：
-  - `model`
-  - `repository`
-  - `MapGeneratorService`
-  - `SpatialIndexService`
-  - `PathFinderService`
-  - 算法测试
-- 成员 B：
-  - `ui`
-  - `TrafficSimulationService`
-  - `ViewportService`
-  - 界面交互与演示整理
+- **成员 A（后端）**：数据模型、文件读写、地图生成、KD-Tree 索引、A* 寻路、车流模拟、视口抽样、单元测试
+- **成员 B（前端）**：桌面端全部 UI 组件与渲染、Web 版导航系统、交互与演示
 
 ## 11. 测试计划
 

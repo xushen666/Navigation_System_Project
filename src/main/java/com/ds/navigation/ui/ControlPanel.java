@@ -14,19 +14,19 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class ControlPanel extends JPanel {
-    private final TextField xField = new TextField(10);
-    private final TextField yField = new TextField(10);
+    private final RoundedTextField xField = new RoundedTextField(10);
+    private final RoundedTextField yField = new RoundedTextField(10);
     private final JLabel startLabel = new JLabel("未选择");
     private final JLabel endLabel = new JLabel("未选择");
-    private final Button generateButton = new Button("生成地图", Button.Style.PRIMARY_FILL);
-    private final Button nearbyButton = new Button("附近100点", Button.Style.PRIMARY_FILL);
-    private final Button distancePathButton = new Button("距离最短路径", Button.Style.PRIMARY_FILL);
-    private final Button timePathButton = new Button("路况最优路径", Button.Style.PRIMARY_OUTLINE);
-    private final Button startSimulationButton = new Button("开始模拟", Button.Style.PRIMARY_FILL);
-    private final Button pauseSimulationButton = new Button("暂停模拟", Button.Style.PRIMARY_OUTLINE);
-    private final Button resetSimulationButton = new Button("重置模拟", Button.Style.PRIMARY_OUTLINE);
-    private final Button clearButton = new Button("清空高亮", Button.Style.PRIMARY_OUTLINE);
-    private final Button resetViewButton = new Button("重置视图", Button.Style.PRIMARY_OUTLINE);
+    private final FlatButton generateButton = new FlatButton("生成地图", FlatButton.Style.PRIMARY_FILL);
+    private final FlatButton nearbyButton = new FlatButton("附近100点", FlatButton.Style.PRIMARY_FILL);
+    private final FlatButton distancePathButton = new FlatButton("距离最短路径", FlatButton.Style.PRIMARY_FILL);
+    private final FlatButton timePathButton = new FlatButton("路况最优路径", FlatButton.Style.PRIMARY_OUTLINE);
+    private final FlatButton startSimulationButton = new FlatButton("开始模拟", FlatButton.Style.PRIMARY_FILL);
+    private final FlatButton pauseSimulationButton = new FlatButton("暂停模拟", FlatButton.Style.PRIMARY_OUTLINE);
+    private final FlatButton resetSimulationButton = new FlatButton("重置模拟", FlatButton.Style.PRIMARY_OUTLINE);
+    private final FlatButton clearButton = new FlatButton("清空高亮", FlatButton.Style.PRIMARY_OUTLINE);
+    private final FlatButton resetViewButton = new FlatButton("重置视图", FlatButton.Style.PRIMARY_OUTLINE);
     private final JTextArea resultArea = new JTextArea(12, 18);
 
     public ControlPanel() {
@@ -186,47 +186,47 @@ public class ControlPanel extends JPanel {
 
     // -- Public API 
 
-    public TextField getXField() {
+    public RoundedTextField getXField() {
         return xField;
     }
 
-    public TextField getYField() {
+    public RoundedTextField getYField() {
         return yField;
     }
 
-    public Button getGenerateButton() {
+    public FlatButton getGenerateButton() {
         return generateButton;
     }
 
-    public Button getNearbyButton() {
+    public FlatButton getNearbyButton() {
         return nearbyButton;
     }
 
-    public Button getDistancePathButton() {
+    public FlatButton getDistancePathButton() {
         return distancePathButton;
     }
 
-    public Button getTimePathButton() {
+    public FlatButton getTimePathButton() {
         return timePathButton;
     }
 
-    public Button getStartSimulationButton() {
+    public FlatButton getStartSimulationButton() {
         return startSimulationButton;
     }
 
-    public Button getPauseSimulationButton() {
+    public FlatButton getPauseSimulationButton() {
         return pauseSimulationButton;
     }
 
-    public Button getResetSimulationButton() {
+    public FlatButton getResetSimulationButton() {
         return resetSimulationButton;
     }
 
-    public Button getClearButton() {
+    public FlatButton getClearButton() {
         return clearButton;
     }
 
-    public Button getResetViewButton() {
+    public FlatButton getResetViewButton() {
         return resetViewButton;
     }
 
